@@ -21,8 +21,13 @@ For commercial licensing, please contact support@quantumnous.com
  */
 
 // System Configuration Defaults
-export const DEFAULT_SYSTEM_NAME = 'New API'
-export const DEFAULT_LOGO = '/logo.png'
+export const DEFAULT_SYSTEM_NAME = 'RainMind'
+export const DEFAULT_LOGO = '/logo.svg'
+
+// Brand main site. Both the public landing header and the console header
+// get their links from useTopNavLinks(), so this single constant drives both.
+// Set to '' to fall back to the in-app /about entry.
+export const MAIN_SITE_URL = 'https://rainmind.net/'
 
 // LocalStorage Keys
 export const STORAGE_KEYS = {

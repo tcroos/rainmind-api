@@ -53,5 +53,6 @@ export const Route = createFileRoute('/pricing/')({
       }
     }
   },
+  // Official model plaza. The vendored plaza skin is no longer used for pricing.
   component: Pricing,
 })

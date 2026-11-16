@@ -97,7 +97,8 @@ function RootComponent() {
       <NavigationProgress />
       <Outlet />
       <Toaster closeButton duration={5000} position='top-center' richColors />
-      {import.meta.env.MODE === 'development' && (
+      {/* Devtools are opt-in: run `VITE_SHOW_DEVTOOLS=1 bun run dev` when needed. */}
+      {import.meta.env.DEV && import.meta.env.VITE_SHOW_DEVTOOLS === '1' && (
         <>
           <ReactQueryDevtools buttonPosition='bottom-left' />
           <TanStackRouterDevtools position='bottom-right' />

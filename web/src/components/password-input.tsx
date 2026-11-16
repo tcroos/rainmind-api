@@ -46,25 +46,44 @@ export function PasswordInput({
     <div className={cn('relative rounded-md', className)}>
       <Input
         type={showPassword ? 'text' : 'password'}
+        data-password-input=''
         ref={ref}
         disabled={disabled}
         {...props}
       />
-      <Button
-        type='button'
-        size='icon'
-        variant='ghost'
-        disabled={disabled}
-        className='text-muted-foreground absolute end-1 top-1/2 h-6 w-6 -translate-y-1/2 rounded-md'
-        onClick={() => setShowPassword((prev) => !prev)}
-        aria-label={visibilityLabel}
-      >
-        {showPassword ? (
-          <Eye size={18} aria-hidden='true' />
-        ) : (
-          <EyeOff size={18} aria-hidden='true' />
-        )}
-      </Button>
+      {/*
+       * Centring the button with `-translate-y-1/2` collides with the shared
+       * button style's `:active` translate (both write --tw-translate-y): on
+       * mousedown the button jumped ~17px down, mouseup landed on the input
+       * and the browser dispatched `click` on their common parent — so the
+       * toggle silently did nothing. Let a wrapper own the positioning and
+       * keep all transforms off the button itself.
+       */}
+      <div className='pointer-events-none absolute inset-y-0 end-0.5 z-10 flex items-center'>
+        <Button
+          type='button'
+          size='icon'
+          variant='ghost'
+          disabled={disabled}
+          data-password-visible={showPassword}
+          aria-pressed={showPassword}
+          title={visibilityLabel}
+          className={cn(
+            'pointer-events-auto h-8 w-8 rounded-md transition-colors',
+            showPassword
+              ? 'bg-foreground/10 text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
+          onClick={() => setShowPassword((prev) => !prev)}
+          aria-label={visibilityLabel}
+        >
+          {showPassword ? (
+            <Eye size={18} aria-hidden='true' />
+          ) : (
+            <EyeOff size={18} aria-hidden='true' />
+          )}
+        </Button>
+      </div>
     </div>
   )
 }

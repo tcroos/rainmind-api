@@ -38,6 +38,9 @@ token_estimator_test.go
 skills-lock.json
 .playwright-mcp
 
+# Pre-edit snapshots created during RainMind frontend integration.
+*.bak-*
+
 # Local-only live probes and scratch test workspaces.
 .local-tests/
 relaykit/relayconvert/chat_responses_live_local_test.go

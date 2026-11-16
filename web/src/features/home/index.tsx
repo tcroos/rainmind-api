@@ -16,26 +16,40 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PublicLayout } from '@/components/layout'
-import { Footer } from '@/components/layout/components/footer'
 import { RichContent } from '@/components/rich-content'
 import { useTheme } from '@/context/theme-provider'
 import { isLikelyHtml } from '@/lib/content-format'
-import { useAuthStore } from '@/stores/auth-store'
 
-import { CTA, Features, Hero, HowItWorks, Stats } from './components'
 import { useHomePageContent } from './hooks'
+import { LandingHome } from './landing-home'
+import { WordmarkSplash } from './wordmark-splash'
 
 export function Home() {
   const { i18n, t } = useTranslation()
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const { resolvedTheme } = useTheme()
-  const { auth } = useAuthStore()
-  const isAuthenticated = !!auth.user
   const { content, isLoaded, isUrl } = useHomePageContent()
+  // Entry splash is rendered from the FIRST paint (below, in every branch) so
+  // the interface never flashes before the wordmark appears. Two-phase reveal:
+  // the page becomes visible UNDER the fading splash (onReveal) as soon as the
+  // glow finishes — never gated on the black hole — and the splash unmounts
+  // once the crossfade completes (onDone).
+  const [revealed, setRevealed] = useState(false)
+  const [splashDone, setSplashDone] = useState(false)
+  const handleReveal = useCallback(() => setRevealed(true), [])
+  const handleSplashDone = useCallback(() => setSplashDone(true), [])
+
+  // Custom home content (admin-configured) has no landing splash to run.
+  useEffect(() => {
+    if (isLoaded && content) {
+      setRevealed(true)
+      setSplashDone(true)
+    }
+  }, [isLoaded, content])
 
   const syncIframePreferences = useCallback(() => {
     try {
@@ -58,13 +72,20 @@ export function Home() {
     }
   }, [isUrl, syncIframePreferences])
 
+  const splash = !splashDone ? (
+    <WordmarkSplash onReveal={handleReveal} onDone={handleSplashDone} />
+  ) : null
+
   if (!isLoaded) {
+    // Same tree shape as the default branch so LandingHome is NOT remounted
+    // when the content query resolves (keeps the black-hole warm-up intact).
     return (
-      <PublicLayout showMainContainer={false}>
-        <main className='flex min-h-screen items-center justify-center'>
-          <div className='text-muted-foreground'>{t('Loading...')}</div>
-        </main>
-      </PublicLayout>
+      <>
+        {splash}
+        <PublicLayout showMainContainer={false}>
+          <LandingHome revealed={revealed} />
+        </PublicLayout>
+      </>
     )
   }
 
@@ -120,14 +141,14 @@ export function Home() {
     )
   }
 
+  // Default home: new-api's original PublicHeader on top (the contract — its
+  // layout/design must not be replaced), RainMind landing content below.
   return (
-    <PublicLayout showMainContainer={false}>
-      <Hero isAuthenticated={isAuthenticated} />
-      <Stats />
-      <Features />
-      <HowItWorks />
-      <CTA isAuthenticated={isAuthenticated} />
-      <Footer />
-    </PublicLayout>
+    <>
+      {splash}
+      <PublicLayout showMainContainer={false}>
+        <LandingHome revealed={revealed} />
+      </PublicLayout>
+    </>
   )
 }

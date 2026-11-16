@@ -183,8 +183,9 @@ export function UserAuthForm({
       })
 
       if (res.success) {
-        form.setValue('password', '')
         if (await handleLoginResult(res.data, redirectTo)) {
+          // Clear the password only after the login truly succeeded.
+          form.setValue('password', '')
           toast.success(t('Welcome back!'))
         }
       } else {

@@ -20,6 +20,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useStatus } from '@/hooks/use-status'
+import { MAIN_SITE_URL } from '@/lib/constants'
 import { parseHeaderNavModulesFromStatus } from '@/lib/nav-modules'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -67,6 +68,17 @@ export function useTopNavLinks(): TopNavLink[] {
     links.push({ title: t('Home'), href: '/' })
   }
 
+  // Brand main site. Both PublicHeader and the console's TopNav render this
+  // list, and both already turn `external` links into <a target="_blank">.
+  // Keeping it right after Home makes it the single way back to the main site.
+  if (MAIN_SITE_URL) {
+    links.push({
+      title: t('Official Site'),
+      href: MAIN_SITE_URL,
+      external: true,
+    })
+  }
+
   // Console -> /dashboard (new console path)
   if (modules?.console !== false) {
     links.push({ title: t('Console'), href: '/dashboard' })
@@ -95,8 +107,11 @@ export function useTopNavLinks(): TopNavLink[] {
     }
   }
 
-  // About
-  if (modules?.about !== false) {
+  // About (in-app page). With a brand main site configured, the "Official
+  // Site" link above supersedes it so the header keeps a single way out to
+  // rainmind.net instead of two entries with the same destination.
+  // /about is still reachable by URL, and clearing MAIN_SITE_URL restores it.
+  if (modules?.about !== false && !MAIN_SITE_URL) {
     links.push({ title: t('About'), href: '/about' })
   }
 

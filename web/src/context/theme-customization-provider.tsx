@@ -29,9 +29,9 @@ import {
   CONTENT_LAYOUT_VALUES,
   type ContentLayout,
   DEFAULT_THEME_CUSTOMIZATION,
+  LOCKED_THEME_PRESET,
   resolveThemeFont,
   THEME_FONT_VALUES,
-  THEME_PRESET_VALUES,
   THEME_RADIUS_VALUES,
   THEME_SCALE_VALUES,
   type ThemeCustomization,
@@ -89,13 +89,10 @@ const ThemeCustomizationContext =
 export function ThemeCustomizationProvider(props: {
   children: React.ReactNode
 }) {
-  const [preset, _setPreset] = useState<ThemePreset>(() =>
-    readThemePreference<ThemePreset>(
-      THEME_STORAGE_KEYS.preset,
-      THEME_PRESET_VALUES,
-      DEFAULT_THEME_CUSTOMIZATION.preset
-    )
-  )
+  // The color preset is locked site-wide (see LOCKED_THEME_PRESET). It is a
+  // constant rather than state: stored values, the reset action and any
+  // consumer calling setPreset can never change the palette.
+  const preset: ThemePreset = LOCKED_THEME_PRESET
   const [font, _setFont] = useState<ThemeFont>(() =>
     readThemePreference<ThemeFont>(
       THEME_STORAGE_KEYS.font,
@@ -126,13 +123,12 @@ export function ThemeCustomizationProvider(props: {
   )
 
   // Mirror state to the <body> via data-* attributes so theme-presets.css can
-  // override CSS variables at the right cascade layer.
+  // override CSS variables at the right cascade layer. The locked preset is
+  // always written explicitly — the palette CSS depends on this attribute and
+  // it must never be removed.
   useEffect(() => {
-    applyAttribute(
-      'data-theme-preset',
-      preset === DEFAULT_THEME_CUSTOMIZATION.preset ? null : preset
-    )
-  }, [preset])
+    applyAttribute('data-theme-preset', LOCKED_THEME_PRESET)
+  }, [])
 
   // Resolve Auto into the preset font or the browser's sans-serif while
   // keeping an explicit Sans choice distinct from that browser fallback.
@@ -158,13 +154,11 @@ export function ThemeCustomizationProvider(props: {
     applyAttribute('data-theme-content-layout', contentLayout)
   }, [contentLayout])
 
-  const setPreset = useCallback((value: ThemePreset) => {
-    _setPreset(value)
-    writeThemePreference(
-      THEME_STORAGE_KEYS.preset,
-      value === DEFAULT_THEME_CUSTOMIZATION.preset ? null : value
-    )
-  }, [])
+  // No-op by design — see LOCKED_THEME_PRESET. The picker is hidden, but the
+  // context API is kept intact so existing consumers stay type-safe.
+  const setPreset = useCallback<
+    ThemeCustomizationContextType['setPreset']
+  >(() => {}, [])
 
   const setFont = useCallback((value: ThemeFont) => {
     _setFont(value)

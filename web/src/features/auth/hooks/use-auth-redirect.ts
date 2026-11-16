@@ -35,7 +35,6 @@ import { isLoginChallenge } from '../secure-verification/api'
  */
 export function useAuthRedirect() {
   const navigate = useNavigate()
-  const sessionID = useAuthStore((state) => state.auth.session?.sid)
   const mounted = useRef(true)
   useEffect(() => {
     mounted.current = true
@@ -51,13 +50,11 @@ export function useAuthRedirect() {
    */
   const handleLoginSuccess = useCallback(
     async (bundle: AuthBundle, redirectTo?: string) => {
-      if (
-        !mounted.current ||
-        useAuthStore.getState().auth.session?.sid !== sessionID
-      ) {
-        return
-      }
+      // A freshly returned bundle is authoritative — always apply it, even if
+      // this component re-rendered or unmounted mid-flight (a stale session-id
+      // guard here used to silently drop successful logins).
       applyAuthBundle(bundle)
+      if (!mounted.current) return
       const savedLang = getSavedLanguage(bundle.user)
       if (savedLang && savedLang !== i18n.language) {
         await i18n.changeLanguage(savedLang)
@@ -67,7 +64,7 @@ export function useAuthRedirect() {
         sanitizeAuthRedirect(redirectTo, window.location.origin) ?? '/dashboard'
       await navigate({ href: targetPath, replace: true })
     },
-    [navigate, sessionID]
+    [navigate]
   )
 
   /**
@@ -75,12 +72,6 @@ export function useAuthRedirect() {
    */
   const handleLoginResult = useCallback(
     async (result: unknown, redirectTo?: string): Promise<boolean> => {
-      if (
-        !mounted.current ||
-        useAuthStore.getState().auth.session?.sid !== sessionID
-      ) {
-        return false
-      }
       if (isAuthBundle(result)) {
         await handleLoginSuccess(result, redirectTo)
         return true
@@ -101,7 +92,7 @@ export function useAuthRedirect() {
       await navigate({ to: '/otp', replace: true })
       return false
     },
-    [handleLoginSuccess, navigate, sessionID]
+    [handleLoginSuccess, navigate]
   )
 
   /**

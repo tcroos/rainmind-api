@@ -12,7 +12,7 @@ import (
 
 var StartTime = time.Now().Unix() // unit: second
 var Version = "v0.0.0"            // this hard coding will be replaced automatically when building, no need to manually change
-var SystemName = "New API"
+var SystemName = "RainMind"
 var Footer = ""
 var Logo = ""
 var TopUpLink = ""
@@ -232,8 +232,8 @@ var (
 	GlobalStaticRateLimitDuration int64
 
 	CriticalRateLimitEnable   bool
-	CriticalRateLimitNum            = 20
-	CriticalRateLimitDuration int64 = 20 * 60
+	CriticalRateLimitNum            = 10
+	CriticalRateLimitDuration int64 = 5 * 60
 
 	UploadRateLimitNum            = 10
 	UploadRateLimitDuration int64 = 60

@@ -80,6 +80,15 @@ export const THEME_PRESETS = [
 ] as const
 
 export type ThemePreset = (typeof THEME_PRESETS)[number]['value']
+
+/**
+ * Site-wide locked color preset (RainMind branding). The picker is hidden in
+ * the theme drawer and the provider ignores any stored/legacy value, so every
+ * visitor — including a fresh browser with empty localStorage — gets this
+ * palette. Change this one constant to re-brand the site.
+ */
+export const LOCKED_THEME_PRESET: ThemePreset = 'anthropic'
+
 export type ThemeRadius = 'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl'
 export type ThemeScale = 'default' | 'sm' | 'lg' | 'xl'
 export type ContentLayout = 'full' | 'centered'
